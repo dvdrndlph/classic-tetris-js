@@ -200,7 +200,7 @@ class ClassicTetris {
   static LINE_CLEAR = 'line-clear';
   
   
-  // doard size in terms of squares
+  // board size in terms of squares
   // this is typically 10x20, but we are adding 2 invisible rows
   // at the top to have enough room to spawn all pieces
   static BOARD_WIDTH = 10;
@@ -251,18 +251,12 @@ class ClassicTetris {
         tapClickMaxDuration = 500,
         tapClickMaxDistance = 10,
         
-        rotateSound = undefined,
-        moveSound = undefined,
-        setSound = undefined,
-        gameOverSound = undefined,
-        lineSound = undefined,
-        tetrisSound = undefined,
-        levelChangeSound = undefined,
-        pauseSound = undefined,
-        gameTheme = undefined
-    
       } = {}) {
-    
+
+    // Bookeeping.
+    this.keystrokeCount = 0;
+    this.keyDownMap = new Map();
+
     // game canvas
     this.canvas = canvas;
     this.context = this.canvas.getContext('2d');
@@ -334,17 +328,6 @@ class ClassicTetris {
     // maximum distance between pointer-down and pointer-up coordinates 
     // for the game to count it as a click/tap
     this.tapClickMaxDistance = tapClickMaxDistance;
-    
-    // sounds
-    this.rotateSound = rotateSound;             // rotation
-    this.moveSound = moveSound;                 // move
-    this.setSound = setSound;                   // piece lock
-    this.gameOverSound = gameOverSound;         // game over
-    this.lineSound = lineSound;                 // line burn
-    this.tetrisSound = tetrisSound;             // tetris
-    this.levelChangeSound = levelChangeSound;   // level increase
-    this.pauseSound = pauseSound;               // game paused
-    this.gameTheme = gameTheme;                 // theme song
         
     // pieces
     this.pieces = [
@@ -583,13 +566,6 @@ class ClassicTetris {
     // reset params
     this._resetParams();
     
-    // play theme song
-    if (this.gameTheme) {
-      this.gameTheme.currentTime = 0;
-      this.gameTheme.loop = true;
-      this.gameTheme.play();
-    }
-    
     // fire game start event
     this._dispatch(ClassicTetris.GAME_START, { 
         type: ClassicTetris.GAME_START,
@@ -687,21 +663,11 @@ class ClassicTetris {
   // add and remove event listeners
   _addEventListeners() {
     this.canvas.addEventListener('contextmenu', this._handleContextMenu, { capture: true, passive: false });
-    document.addEventListener('pointerdown', this._handlePointerDown, { capture: true, passive: false });
-    document.addEventListener('pointermove', this._handlePointerMove, { capture: true, passive: false });
-    document.addEventListener('pointerup', this._handlePointerUp, { capture: true, passive: false });
-    document.addEventListener('pointercancel', this._handlePointerCancel, { capture: true, passive: false });
-    document.addEventListener('wheel', this._handleWheel, { capture: true, passive: false });
     document.addEventListener('keydown', this._handleKeyDown, { capture: true, passive: false });
   }
   
   _removeEventListeners() {
     this.canvas.removeEventListener('contextmenu', this._handleContextMenu, true);
-    document.removeEventListener('pointerdown', this._handlePointerDown, true);
-    document.removeEventListener('pointermove', this._handlePointerMove, true);
-    document.removeEventListener('pointerup', this._handlePointerUp, true);
-    document.removeEventListener('pointercancel', this._handlePointerCancel, true);
-    document.removeEventListener('wheel', this._handleWheel, true);
     document.removeEventListener('keydown', this._handleKeyDown, true);
   }
   
@@ -714,6 +680,16 @@ class ClassicTetris {
     this.canvas.style.touchAction = 'auto';
   }
   
+  _logKeyDown() {
+    const epoch = Math.floor(Date.now() / 1000);
+    this.keyDownMap.set(epoch, 1);  
+    // if (this.keyDownMap.has(epoch)) {
+    //   new_val = this.keyDownMap.get(epoch) + 1;
+    //   this.keyDownMap.set(epoch, new_val);
+    // } else {
+    //   this.keyDownMap.set(epoch, 1);  
+    // }
+  }
   
   //-----------------------------------------------------------
   // 
@@ -750,7 +726,9 @@ class ClassicTetris {
   // 
   // key event listener
   _handleKeyDown = event => {
-    
+    this.keystrokeCount++;
+    console.log(this.keystrokeCount);
+    this._logKeyDown();
     switch (event.keyCode || event.which) {
       case 37:
       case 65:
@@ -800,147 +778,6 @@ class ClassicTetris {
     }
   }
   
-  
-  //
-  // pointer device inputs:
-  //
-  // action                 pointer moves
-  // ------------------------------------------------------------------
-  // left                   move the pointer to the left of the piece
-  // right                  move the pointer to the right of the piece
-  // down                   use the pointer drag the piece down
-  // rotate clockwise       click / tap            
-  //                        (left mouse button,       
-  //                        touch contact, 
-  //                        pen contact),
-  //                        wheel up
-  // rotate anticlockwise   click / tap 
-  //                        (mouse wheel,
-  //                        right mouse button, 
-  //                        pen barrel button,
-  //                        X1 (back) mouse,
-  //                        X2 (forward) mouse,
-  //                        pen eraser button),
-  //                        wheel down
-  
-  // pointer move handler
-  _handlePointerMove = event => {
-    event.preventDefault();
-    
-    // no movement tracking during pause
-    if (this.gameState === ClassicTetris.STATE_PAUSE) return;
-    
-    // find out if pointer is left or right or below the piece
-    // then move piece accordingly
-    const { x, y } = this._getEventCoords(event);
-    
-    // get pointer's row & column
-    const row = ((y - this.boardY) / this.squareSide) | 0;
-    const column = ((x - this.boardX) / this.squareSide) | 0;
-    
-    // get piece's bounds, calculate center column and row center 
-    const { top, bottom, left, right } = this._getPieceBounds();
-    const middleRow = ((top + bottom) / 2) | 0;
-    const middleColumn = ((left + right) / 2) | 0;
-    
-    // enable pointer's ability to move down
-    // if the pointer is on the piece or above
-    if (row <= bottom) {
-      this.pointerMoveDownEnabled = true;
-    }
-    
-    // move left 
-    if (column < middleColumn) {
-      this.moveRight = !(this.moveLeft = true);
-    }
-    
-    // move right
-    if (column > middleColumn) {
-      this.moveLeft = !(this.moveRight = true);
-    }
-    
-    // move down
-    if (this.pointerMoveDownEnabled && row > middleRow) {
-      this.moveDown = true;
-    }
-  }
-  
-  
-  // pointerdown handler
-  _handlePointerDown = event => {
-    //event.preventDefault();
-    
-    // do nothing during pause
-    if (this.gameState === ClassicTetris.STATE_PAUSE) return;
-    
-    const { x, y } = this._getEventCoords(event);
-    this.xIni = x;                  // store pointer coords
-    this.yIni = y;
-    this.tIni = performance.now();  // time since time origin
-  }
-  
-  
-  // touch gesture times, relevant in tap detection:
-  // Fingertip forces and completion time for index finger and thumb touchscreen gestures.
-  // https://www.ncbi.nlm.nih.gov/pubmed/28314216
-  // "Tap was the fastest gesture to complete at 133(83)ms,   // Mean(±SD) times
-  // followed by slide right at 421(181)ms. 
-  // On average, participants took the longest to complete the stretch gesture at 920(398)ms."
-  
-  // pointer up handler
-  _handlePointerUp = event => {
-    event.preventDefault();
-    
-    // do nothing during pause
-    if (this.gameState === ClassicTetris.STATE_PAUSE) return;
-    
-    const { x, y } = this._getEventCoords(event);
-    const a = this.xIni - x;                  // calculate distance
-    const b = this.yIni - y;                  // between tap-down and tap-up coordinates
-    const dist = Math.sqrt(a * a + b * b);
-    
-    // detect tap/click:
-    if (dist <= this.tapClickMaxDistance &&                           // similar coords
-        performance.now() - this.tIni <= this.tapClickMaxDuration) {  // gesture was short
-        
-      if (event.button === 0) {
-        // left mouse button, touch contact, pen contact
-        // rotate piece clockwise
-        this.rotateAnticlockwise = !(this.rotateClockwise = true);
-        
-      } else {
-        // right button, mouse wheel...
-        // rotate piece anticlockwise
-        this.rotateClockwise = !(this.rotateAnticlockwise = true);
-        
-      }
-    }
-  }
-  
-  
-  // pointer cancel
-  _handlePointerCancel = event => {
-    event.preventDefault();
-    
-    // reset pointer flags
-    this.pointerMoveDownEnabled = false;
-  }
-  
-  // wheel rotates the piece
-  _handleWheel = event => {
-    event.preventDefault();
-    
-    // do nothing during pause
-    if (this.gameState === ClassicTetris.STATE_PAUSE) return;
-    
-    if (event.deltaY > 0) {
-      // rotate piece clockwise
-      this.rotateAnticlockwise = !(this.rotateClockwise = true);
-    } else if (event.deltaY < 0) {
-      // rotate piece anticlockwise
-      this.rotateClockwise = !(this.rotateAnticlockwise = true);
-    }
-  }
   
   
   // pointer coordinates
@@ -1027,12 +864,6 @@ class ClassicTetris {
       const oldPosition = [ ...this.piecePosition ];
       --this.piecePosition[0];
       
-      // play move sound
-      if (this.moveSound) {
-        this.moveSound.currentTime = 0;
-        this.moveSound.play();
-      }
-      
       // fire move left event
       this._dispatch(ClassicTetris.PIECE_MOVE_LEFT, {
         type: ClassicTetris.PIECE_MOVE_LEFT,
@@ -1046,12 +877,6 @@ class ClassicTetris {
     if (this.moveRight && this._canMovePiece(1, 0)) {
       const oldPosition = [ ...this.piecePosition ];
       ++this.piecePosition[0];
-      
-      // play move sound
-      if (this.moveSound) {
-        this.moveSound.currentTime = 0;
-        this.moveSound.play();
-      }
       
       // fire move right event
       this._dispatch(ClassicTetris.PIECE_MOVE_RIGHT, {
@@ -1067,12 +892,6 @@ class ClassicTetris {
       const oldRotation = this.pieceRotation;
       this.pieceRotation = (this.pieceRotation + 1) % this.piece.rot.length;
       
-      // play rotation sound
-      if (this.rotateSound) {
-        this.rotateSound.currentTime = 0;
-        this.rotateSound.play();
-      }
-      
       // fire clockwise rotation event
       this._dispatch(ClassicTetris.PIECE_ROTATE_CLOCKWISE, {
         type: ClassicTetris.PIECE_ROTATE_CLOCKWISE,
@@ -1086,12 +905,6 @@ class ClassicTetris {
     if (this.rotateAnticlockwise && this._canRot((this.pieceRotation + this.piece.rot.length - 1) % this.piece.rot.length)) {
       const oldRotation = this.pieceRotation;
       this.pieceRotation = (this.pieceRotation + this.piece.rot.length - 1) % this.piece.rot.length;
-      
-      // play rotation sound
-      if (this.rotateSound) {
-        this.rotateSound.currentTime = 0;
-        this.rotateSound.play();
-      }
       
       // fire anticlockwise rotation event
       this._dispatch(ClassicTetris.PIECE_ROTATE_ANTICLOCKWISE, {
@@ -1185,13 +998,6 @@ class ClassicTetris {
         this.board[this.linesCleared[i]][mid - 1 - this.columnsCleared] = -1;
       }
       
-      // play corresponding lines clear sound
-      const sound = this.linesCleared.length === 4 ? this.tetrisSound : this.lineSound;
-      if (sound) {
-        sound.currentTime = 0;
-        sound.play();
-      }
-      
       // fire burn start event
       this._dispatch(ClassicTetris.LINE_CLEAR_START, {
         type: ClassicTetris.LINE_CLEAR_START,
@@ -1199,12 +1005,6 @@ class ClassicTetris {
       });
       
     } else {
-      
-      // play piece lock sound
-      if (this.setSound) {
-        this.setSound.currentTime = 0;
-        this.setSound.play();
-      }
       
       // update score
       const oldScore = this.score;
@@ -1277,12 +1077,6 @@ class ClassicTetris {
           const oldLevel = this.level;
           this.level = levelTemp;
           
-          // play level change sound
-          if (this.levelChangeSound) {
-            this.levelChangeSound.currentTime = 0;
-            this.levelChangeSound.play();
-          }
-          
           // fire level change event
           this._dispatch(ClassicTetris.LEVEL_CHANGE, { 
             type: ClassicTetris.LEVEL_CHANGE,
@@ -1337,17 +1131,6 @@ class ClassicTetris {
   }
   
   _triggerGameOver() {
-    // stop theme song
-    if (this.gameTheme) {
-      this.gameTheme.pause();
-    }
-    
-    // play game over sound
-    if (this.gameOverSound) {
-      this.gameOverSound.currentTime = 0;
-      this.gameOverSound.play();
-    }
-    
     this.gameOverLine = 1;
     this.gameState = ClassicTetris.STATE_GAME_OVER;
     
@@ -1391,11 +1174,6 @@ class ClassicTetris {
         // reset pointer flags
         this.pointerMoveDownEnabled = false;
         
-        // resume theme song
-        if (this.gameTheme) {
-          this.gameTheme.play();
-        }
-        
         // fire resume event
         this._dispatch(ClassicTetris.GAME_RESUME, {
           type: ClassicTetris.GAME_RESUME,
@@ -1407,17 +1185,6 @@ class ClassicTetris {
       } else {
         this.previousGameState = this.gameState;
         this.gameState = ClassicTetris.STATE_PAUSE;
-        
-        // pause theme song
-        if (this.gameTheme) {
-          this.gameTheme.pause();
-        }
-        
-        // play pause sound
-        if (this.pauseSound) {
-          this.pauseSound.currentTime = 0;
-          this.pauseSound.play();
-        }
         
         // fire pause event
         this._dispatch(ClassicTetris.GAME_PAUSE, {
