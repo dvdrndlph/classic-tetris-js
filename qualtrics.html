@@ -1,28 +1,10 @@
 <head>
   <!-- <script src='//dvdrndlph.github.io/classic-tetris-js/classic-tetris.js'></script> -->
-  <script src='classic-tetris.js'></script>
+  <script src='//dvdrndlph.github.io/classic-tetris-js/classic-tetris.js'></script>
   <link href="//vjs.zencdn.net/8.21.1/video-js.min.css" rel="stylesheet">
   <script src="//vjs.zencdn.net/8.21.1/video.min.js"></script>
   <!-- <link rel="stylesheet" href="//dvdrndlph.github.io/classic-tetris-js/style.css"> -->
-  <script>
-    window.addEventListener('load', event => {
-      const vidPlayer = videojs('my-player');
-      const tetris_canvas = document.getElementById('tetris-canvas');
-      const tetris_game = new ClassicTetris(tetris_canvas);
-      document.getElementById('start-stop-btn').addEventListener('click', event => {
-        const startLevel = document.getElementById('level-input').value;
-        tetris_game.setStartLevel(startLevel);
-        tetris_game.togglePlayPause();
-      });
-      document.getElementById('quit-btn').addEventListener('click', event => {
-        tetris_game.quit();
-      });
-      vidPlayer.on('ended', function() {
-        tetris_game.experimentOver();
-      });
-    });
-  </script>
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="//dvdrndlph.github.io/classic-tetris-js/style.css">
 </head>
 <body>
   <div id="divMain" class="text-center">
