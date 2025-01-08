@@ -1,28 +1,10 @@
 <head>
+  <!-- <script src='//dvdrndlph.github.io/classic-tetris-js/classic-tetris.js'></script> -->
   <script src='classic-tetris.js'></script>
   <link href="//vjs.zencdn.net/8.21.1/video-js.min.css" rel="stylesheet">
   <script src="//vjs.zencdn.net/8.21.1/video.min.js"></script>
-  <script>
-  
-  window.addEventListener('load', event => {
-    const vidPlayer = videojs('my-player');
-    const tetris_canvas = document.getElementById('tetris-canvas');
-    const tetris_game = new ClassicTetris(tetris_canvas);
-    document.getElementById('start-stop-btn').addEventListener('click', event => {
-      const startLevel = document.getElementById('level-input').value;
-      tetris_game.setStartLevel(startLevel);
-      tetris_game.togglePlayPause();
-    });
-    document.getElementById('quit-btn').addEventListener('click', event => {
-      tetris_game.quit();
-    });
-    vidPlayer.on('ended', function() {
-      tetris_game.experimentOver();
-    });
-  });
-
-  </script>
-  <link rel="stylesheet" href="./style.css">
+  <!-- <link rel="stylesheet" href="//dvdrndlph.github.io/classic-tetris-js/style.css"> -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="divMain" class="text-center">
@@ -31,13 +13,7 @@
       <video id="my-player" class="video-js" controls preload="auto" data-setup='{"controls": false, "autoplay": false, "preload": "auto"}'>
         <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"
                 type="video/mp4"></source>
-        <p class="vjs-no-js">
-          To view this video please enable JavaScript, and consider upgrading to a
-          web browser that
-          <a href="https://videojs.com/html5-video-support/" target="_blank">
-          supports HTML5 video.
-          </a>
-        </p>
+        <p class="vjs-no-js">To view this video please enable JavaScript.</p>
       </video>
     </div>
     <div id="distractionArea">
