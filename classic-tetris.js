@@ -254,8 +254,13 @@ class ClassicTetris {
       } = {}) {
 
     // Bookeeping.
-    this.keystrokeCount = 0;
+    this.keyDownCount = 0;
     this.keyDownMap = new Map();
+
+    this.videoPlayer = videojs('my-player');
+    this.videoPlaying = false;
+    this.videoStartSec = 0;
+    this.lineTotal = 0;
 
     // game canvas
     this.canvas = canvas;
@@ -540,6 +545,11 @@ class ClassicTetris {
   //----------------------------------------------------------------------------------------
   
   togglePlayPause() {
+    if (! this.videoPlaying) {
+      this.videoPlayer.play();
+      this.videoPlaying = true;
+      this.videoStartSec = Math.floor(Date.now() / 1000);
+    }
     if (this.playing) {
       this.doUndoPause = true;
     } else {
@@ -552,7 +562,7 @@ class ClassicTetris {
       this._triggerGameOver();
     }
   }
-  
+
   // start new game
   async play() {
     if (this.playing) return;
@@ -726,8 +736,7 @@ class ClassicTetris {
   // 
   // key event listener
   _handleKeyDown = event => {
-    this.keystrokeCount++;
-    console.log(this.keystrokeCount);
+    this.keyDownCount++;
     this._logKeyDown();
     switch (event.keyCode || event.which) {
       case 37:
@@ -857,7 +866,6 @@ class ClassicTetris {
   _processDrop() {
     // decrease drop counter
     --this.framesTilDrop;
-    
     
     // do move if buffered
     if (this.moveLeft && this._canMovePiece(-1, 0)) {
@@ -1129,8 +1137,23 @@ class ClassicTetris {
       }
     }
   }
-  
+ 
+  experimentOver() {
+    console.log("The exxperiment is over.")
+    if (this.lineTotal == 0) {
+      this.lineTotal = this.lines
+    }
+    console.log("Line total: " + this.lineTotal + " Key down count: " + this.keyDownCount);
+    console.log("Video start second: " + this.videoStartSec)
+    console.log(this.keyDownMap)
+  } 
+
   _triggerGameOver() {
+    this.lineTotal += this.lines;
+    console.log("Line total: " + this.lineTotal + " Key down count: " + this.keyDownCount);
+    console.log("Video start second: " + this.videoStartSec)
+    // var videoEndSec = Math.floor(Date.now() / 1000);
+    // console.log("Video end second: " + videoEndSec)
     this.gameOverLine = 1;
     this.gameState = ClassicTetris.STATE_GAME_OVER;
     
