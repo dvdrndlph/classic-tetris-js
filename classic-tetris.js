@@ -1136,21 +1136,29 @@ class ClassicTetris {
       }
     }
   }
- 
-  experimentOver() {
-    console.log("The exxperiment is over.")
+
+  getLineTotal() {
     if (this.lineTotal == 0) {
-      this.lineTotal = this.lines
+      return this.lines;
+    } else {
+      return this.lineTotal + this.lines;
     }
-    console.log("Line total: " + this.lineTotal + " Key down count: " + this.keyDownCount);
-    console.log("Video start second: " + this.videoStartSec)
-    console.log(this.keyDownMap)
-  } 
+  }
+
+  getStartSecond() {
+    this.videoStartSec;
+  }
+
+  getDistractedSeconds() {
+    var keys = Array.from(this.keyDownMap.keys());
+    secStr = keys.join(",");
+    return secStr;
+  }
 
   _triggerGameOver() {
     this.lineTotal += this.lines;
-    console.log("Line total: " + this.lineTotal + " Key down count: " + this.keyDownCount);
-    console.log("Video start second: " + this.videoStartSec)
+    this.lines = 0
+    console.log("Game line total: " + this.lines + " Total keys down: " + this.keyDownCount);
     // var videoEndSec = Math.floor(Date.now() / 1000);
     // console.log("Video end second: " + videoEndSec)
     this.gameOverLine = 1;
