@@ -1146,7 +1146,7 @@ class ClassicTetris {
   }
 
   getStartSecond() {
-    this.videoStartSec;
+    return this.videoStartSec;
   }
 
   getDistractedSeconds() {
