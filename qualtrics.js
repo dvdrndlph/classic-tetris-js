@@ -31,10 +31,10 @@ Qualtrics.SurveyEngine.addOnload(function()
     tetris_game.quit();
   });
   vidPlayer.on('ended', function() {
-	Qualtrics.SurveyEngine.setEmbeddedData('keyDownCount', tetris_game.keyDownCount);
-	Qualtrics.SurveyEngine.setEmbeddedData('lineTotal', tetris_game.getLineTotal());
-	Qualtrics.SurveyEngine.setEmbeddedData('startSecond', tetris_game.getStartSecond());
-	Qualtrics.SurveyEngine.setEmbeddedData('distractedSeconds', tetris_game.getDistractedSeconds());
+    Qualtrics.SurveyEngine.setEmbeddedData('keyDownCount', tetris_game.keyDownCount);
+    Qualtrics.SurveyEngine.setEmbeddedData('lineTotal', tetris_game.getLineTotal());
+    Qualtrics.SurveyEngine.setEmbeddedData('startSecond', tetris_game.getStartSecond());
+    Qualtrics.SurveyEngine.setEmbeddedData('distractedSeconds', tetris_game.getDistractedSeconds());
   });
 });	
 
@@ -42,7 +42,6 @@ Qualtrics.SurveyEngine.addOnload(function()
 
 Qualtrics.SurveyEngine.addOnReady(function()
 {
-	/*Place your JavaScript here to run when the page is fully displayed*/
 });
 
 Qualtrics.SurveyEngine.addOnUnload(function()
