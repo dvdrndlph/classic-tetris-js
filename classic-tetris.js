@@ -1151,7 +1151,7 @@ class ClassicTetris {
 
   getDistractedSeconds() {
     var keys = Array.from(this.keyDownMap.keys());
-    secStr = keys.join(",");
+    var secStr = keys.join(",");
     return secStr;
   }
 
