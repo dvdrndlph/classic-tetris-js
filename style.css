@@ -33,6 +33,8 @@ h2 {
     background-color:#FFF;
     color:#000;
     resize: none;
-    width: 230px;
-    height: 315px;
+    width: 480px;
+    height: 640px;
+    font-family:"Times New Roman", Times, serif;  
+    font-size: 12px; 
 }
