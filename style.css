@@ -32,4 +32,7 @@ h2 {
 #essayBox {
     background-color:#FFF;
     color:#000;
+    resize: none;
+    rows: 12;
+    columns: 50;
 }
