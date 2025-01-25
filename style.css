@@ -29,3 +29,7 @@ h2 {
     font:17px georgia;
     user-select:none;
 }
+#essayBox {
+    background-color:#FFF;
+    color:#000;
+}
