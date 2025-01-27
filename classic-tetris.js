@@ -775,14 +775,14 @@ class ClassicTetris {
         event.preventDefault();
         this.hardDrop = true;
         break;
-      case 27:
-      case 80:
-        // pause
-        event.preventDefault();
-        if (this.gameState != ClassicTetris.STATE_GAME_OVER) {
-          this.doUndoPause = true;
-        }
-        break;
+      // case 27:
+      // case 80:
+      //   // pause
+      //   event.preventDefault();
+      //   if (this.gameState != ClassicTetris.STATE_GAME_OVER) {
+      //     this.doUndoPause = true;
+      //   }
+      //   break;
     }
   }
   
@@ -1180,7 +1180,6 @@ class ClassicTetris {
       if (this.gameOverLine < this.boardHeight) {
         // paint next row
         for (let i = 0; i < this.boardWidth; ++i) this.board[this.gameOverLine][i] = 7;
-        
       } else {
         // game-over animation is done -stop the game loop
         this.gameLoop = false;
@@ -1192,6 +1191,7 @@ class ClassicTetris {
           score: this.score,
           lines: this.lines
         });
+        this.play(); // No rest for the weary.
       }
     }
   }
