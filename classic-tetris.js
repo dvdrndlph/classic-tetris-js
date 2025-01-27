@@ -1172,6 +1172,7 @@ class ClassicTetris {
       score: this.score,
       lines: this.lines
     });
+    this.autoRestart();
   }
   
   _processGameOver() {
@@ -1191,7 +1192,6 @@ class ClassicTetris {
           score: this.score,
           lines: this.lines
         });
-        this.play(); // No rest for the weary.
       }
     }
   }
